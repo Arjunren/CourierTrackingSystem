@@ -1,0 +1,32 @@
+openapi: 3.1.0
+info: { title: Courier Tracking API, version: 1.0.0, license: { name: MIT, identifier: MIT } }
+servers: [{ url: 'http://localhost:8080' }]
+security: [{ bearerAuth: [] }]
+paths:
+  /api/auth/register:
+    post: { summary: Register a customer, security: [], responses: { '201': { description: Created }, '422': { description: Invalid input } } }
+  /api/auth/login:
+    post: { summary: Log in, security: [], responses: { '200': { description: Token }, '401': { description: Invalid credentials } } }
+  /api/track/{number}:
+    parameters: [{ name: number, in: path, required: true, schema: { type: string } }]
+    get: { summary: Public privacy-limited tracking, security: [], responses: { '200': { description: Tracking history }, '404': { description: Not found } } }
+  /api/dashboard:
+    get: { summary: Role-scoped shipment summary, responses: { '200': { description: Dashboard }, '401': { description: Unauthorized } } }
+  /api/users:
+    post: { summary: Create user as admin, responses: { '201': { description: Created }, '403': { description: Forbidden } } }
+  /api/shipments:
+    get: { summary: Search visible shipments, responses: { '200': { description: Paginated shipments }, '401': { description: Unauthorized } } }
+    post: { summary: Create shipment as customer, responses: { '201': { description: Created }, '403': { description: Forbidden } } }
+  /api/shipments/{id}:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer, minimum: 1 } }]
+    get: { summary: Read an accessible shipment, responses: { '200': { description: Shipment }, '403': { description: Ownership check failed } } }
+  /api/shipments/{id}/assign:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer, minimum: 1 } }]
+    post: { summary: Assign an active courier, responses: { '200': { description: Assigned }, '409': { description: Already assigned } } }
+  /api/shipments/{id}/status:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer, minimum: 1 } }]
+    post: { summary: Advance or cancel shipment status, responses: { '200': { description: Updated }, '409': { description: Invalid transition } } }
+  /api/shipments/{id}/events:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer, minimum: 1 } }]
+    get: { summary: Read tracking history for an accessible shipment, responses: { '200': { description: Events }, '403': { description: Forbidden } } }
+components: { securitySchemes: { bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT } } }
